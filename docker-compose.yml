@@ -1,14 +1,19 @@
 services:
 
+  # Main application
   web:
     build: .
     container_name: inventory-web
+
     ports:
       - "8080:80"
+
     volumes:
       - .:/var/www/html
+
     depends_on:
       - mysql
+
     environment:
       DB_HOST: mysql
       DB_USER: inventory_user
@@ -16,19 +21,119 @@ services:
       DB_NAME: inventory_system
 
 
+  # Products module
+  products:
+    build: .
+    container_name: inventory-products
+
+    ports:
+      - "8081:80"
+
+    volumes:
+      - ./products:/var/www/html
+      - ./config:/var/www/config
+      - ./includes:/var/www/includes
+
+    depends_on:
+      - mysql
+
+    environment:
+      DB_HOST: mysql
+      DB_USER: inventory_user
+      DB_PASSWORD: inventory_pass
+      DB_NAME: inventory_system
+
+
+  # Suppliers module
+  suppliers:
+    build: .
+    container_name: inventory-suppliers
+
+    ports:
+      - "8082:80"
+
+    volumes:
+      - ./suppliers:/var/www/html
+      - ./config:/var/www/config
+      - ./includes:/var/www/includes
+
+    depends_on:
+      - mysql
+
+    environment:
+      DB_HOST: mysql
+      DB_USER: inventory_user
+      DB_PASSWORD: inventory_pass
+      DB_NAME: inventory_system
+
+
+  # Categories module
+  categories:
+    build: .
+    container_name: inventory-categories
+
+    ports:
+      - "8083:80"
+
+    volumes:
+      - ./categories:/var/www/html
+      - ./config:/var/www/config
+      - ./includes:/var/www/includes
+
+    depends_on:
+      - mysql
+
+    environment:
+      DB_HOST: mysql
+      DB_USER: inventory_user
+      DB_PASSWORD: inventory_pass
+      DB_NAME: inventory_system
+
+
+  # Transactions module
+  # NOTE: your folder is "transaction" not "transactions"
+  transactions:
+    build: .
+    container_name: inventory-transactions
+
+    ports:
+      - "8084:80"
+
+    volumes:
+      - ./transaction:/var/www/html
+      - ./config:/var/www/config
+      - ./includes:/var/www/includes
+
+    depends_on:
+      - mysql
+
+    environment:
+      DB_HOST: mysql
+      DB_USER: inventory_user
+      DB_PASSWORD: inventory_pass
+      DB_NAME: inventory_system
+
+
+
+  # Database (DO NOT CHANGE)
   mysql:
     image: mysql:8.0
     container_name: inventory-mysql
+
     environment:
       MYSQL_DATABASE: inventory_system
       MYSQL_USER: inventory_user
       MYSQL_PASSWORD: inventory_pass
       MYSQL_ROOT_PASSWORD: rootpass
-    ports:
-      - "3307:3306"
+
     volumes:
       - mysql-data:/var/lib/mysql
+      - ./inventory_system.sql:/docker-entrypoint-initdb.d/inventory_system.sql:ro
+
+    ports:
+      - "3307:3306"
 
 
 volumes:
+
   mysql-data:
